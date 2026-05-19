@@ -1,0 +1,174 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://kit.fontawesome.com/cb792c0850.js" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>HostelGram - Hostel Chats</title>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <style>
+        .chat-wrapper {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .chat-sidebar {
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 20px;
+            height: calc(100vh - 80px);
+            overflow-y: auto;
+        }
+        .chat-conversation {
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 20px;
+            min-height: calc(100vh - 80px);
+            display: flex;
+            flex-direction: column;
+        }
+        .conversation-user {
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        .message-card {
+            background: #f8f9ff;
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            max-width: 75%;
+        }
+        .message-sent {
+            align-self: flex-end;
+            background: #667eea;
+            color: white;
+        }
+        .message-received {
+            align-self: flex-start;
+            background: #f3f4ff;
+        }
+        .message-input-group {
+            margin-top: auto;
+            display: flex;
+            gap: 10px;
+        }
+        .message-input {
+            flex: 1;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 10px 14px;
+        }
+        .message-send {
+            border-radius: 12px;
+            padding: 10px 18px;
+        }
+    </style>
+</head>
+<body class="main-body">
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-2 d-none d-md-block sidebar sidebar-modern" style="position: fixed;">
+                <div class="text-center mt-4 sidebar-profile">
+                    <div class="profile-avatar">
+                        <img src="{{ profile.profileimg.url }}" alt="Profile Picture" class="profile-pic">
+                    </div>
+                    <h4 class="mt-3 username"><a href="/profile/{{ user }}" style="text-decoration:none;">@{{ user }}</a></h4>
+                </div>
+                <ul class="nav flex-column mt-5 nav-modern">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fa-solid fa-house mr-2"></i> Hostel Feed
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/explore">
+                            <i class="fa-solid fa-compass mr-2"></i> Discover Hostels
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/messages/">
+                            <i class="fa-solid fa-comments mr-2"></i> Hostel Chat
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/profile/{{user}}">
+                            <i class="fa-solid fa-user mr-2"></i> My Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logoutt">
+                            <i class="fa-solid fa-right-from-bracket mr-2"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="chat-wrapper">
+                    <div class="chat-sidebar">
+                        <h5>Followers</h5>
+                        <div class="list-group mt-3">
+                            {% if followers %}
+                                {% for follower in followers %}
+                                <a href="/messages/?to={{ follower.user.username }}" class="list-group-item list-group-item-action{% if selected_username == follower.user.username %} active{% endif %}">
+                                    @{{ follower.user.username }}
+                                </a>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-muted">You do not have any followers to message yet.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="chat-conversation">
+                        <div class="conversation-user">Conversation with {% if selected_username %}@{{ selected_username }}{% else %}no one yet{% endif %}</div>
+                        <div class="conversation-feed" style="overflow-y: auto; max-height: calc(100vh - 280px); padding-right: 10px;">
+                            {% if conversation %}
+                                {% for message in conversation %}
+                                    <div class="message-card {% if message.sender == user %}message-sent{% else %}message-received{% endif %}">
+                                        <div class="d-flex justify-content-between align-items-start small text-muted mb-1">
+                                            <div>
+                                                {% if message.sender == user %}
+                                                    You
+                                                {% else %}
+                                                    @{{ message.sender }}
+                                                {% endif %}
+                                            </div>
+                                            {% if message.sender == user %}
+                                            <form action="/delete-message/{{ message.id }}/" method="POST" style="margin:0;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                        <div>{{ message.body }}</div>
+                                        <div class="text-end text-muted small mt-1">{{ message.created_at|date:'M d, Y H:i' }}</div>
+                                    </div>
+                                {% endfor %}
+                            {% elif selected_username %}
+                                <p class="text-muted">No messages yet. Send the first one to @{{ selected_username }}.</p>
+                            {% endif %}
+                        </div>
+                        <form action="/send-message/" method="POST" class="message-input-group mt-3">
+                            {% csrf_token %}
+                            <input type="hidden" name="receiver" value="{{ selected_username }}">
+                            <input type="text" name="body" class="message-input" placeholder="Write a message..." {% if not selected_username %}disabled{% endif %} required>
+                            <button type="submit" class="btn btn-primary message-send" {% if not selected_username %}disabled{% endif %}>Send</button>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</body>
+</html>

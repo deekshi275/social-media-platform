@@ -1,0 +1,408 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://kit.fontawesome.com/cb792c0850.js" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title>HostelGram - Connect with Hostel Mates</title>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+
+<body class="main-body">
+   <!-- Modal code -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-2 d-none d-md-block sidebar sidebar-modern" style="position: fixed;">
+            <div class="text-center mt-4 sidebar-profile">
+                <div class="profile-avatar">
+                    <img src="{{profile.profileimg.url}}" alt="Profile Picture" class="profile-pic">
+                </div>
+                <h4 class="mt-3 username"><a href="/profile/{{user}}" style="text-decoration:none;">@{{user}}</a></h4>
+            </div>
+            <ul class="nav flex-column mt-5 nav-modern">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/">
+                        <i class="fa-solid fa-house mr-2"></i> Hostel Feed
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/explore">
+                        <i class="fa-solid fa-compass mr-2"></i> Discover Hostels
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/messages/">
+                        <i class="fa-solid fa-comments mr-2"></i> Hostel Chat
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal3">
+                        <i class="fa-solid fa-magnifying-glass mr-2"></i> Find Members
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link create-btn" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                        data-bs-whatever="@getbootstrap">
+                        <i class="fa-solid fa-circle-plus mr-2"></i> Share Story
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/profile/{{user}}">
+                        <i class="fa-solid fa-user mr-2"></i> My Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link logout-btn" href="/logoutt">
+                        <i class="fa-solid fa-right-from-bracket mr-2"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 main-content">
+            
+            {% include "modal.html" %}
+            {% include "search.html" %}
+
+            <!-- Stories Section -->
+            <div class="stories-container mt-5 mb-5">
+                <h5 class="stories-title mb-3"><i class="fa-solid fa-fire"></i> Stories</h5>
+                <div class="stories-wrapper">
+                    <!-- Add Story Button -->
+                    <div class="story-item">
+                        <div class="story-circle" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); cursor: pointer;" data-bs-toggle="modal" data-bs-target="#storyUploadModal">
+                            <i class="fa-solid fa-plus"></i>
+                        </div>
+                        <p class="story-name">Add Story</p>
+                    </div>
+                    
+                    <!-- Display Story Groups -->
+                    {% for story_group in story_groups %}
+                    <div class="story-item position-relative">
+                        <div class="story-circle" style="background-image: url('{{story_group.latest_image}}'); background-size: cover; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#storyModal" data-story-group-index="{{ forloop.counter0 }}">
+                            <span class="story-label">{{story_group.user|slice:":1"|upper}}</span>
+                            {% if story_group.count > 1 %}
+                            <span class="story-count">+{{ story_group.count }}</span>
+                            {% endif %}
+                        </div>
+                        <p class="story-name">{{story_group.user|truncatewords:1}}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <script id="story-groups-data" type="application/json">{{ story_groups_json|safe }}</script>
+
+            <!-- Suggested Accounts -->
+            <div class="suggestions-card mb-4">
+                <div class="suggestions-header d-flex justify-content-between align-items-center">
+                    <h5 class="section-title">Suggested Accounts</h5>
+                    <small class="text-muted">Based on what you may like</small>
+                </div>
+                <div class="suggestions-list row g-3">
+                    {% for suggestion in suggestions %}
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="suggestion-item">
+                            <div class="suggestion-info">
+                                <div class="suggestion-avatar">{{ suggestion.user.username|slice:":1"|upper }}</div>
+                                <div>
+                                    <p class="suggestion-name">@{{ suggestion.user.username }}</p>
+                                    <p class="suggestion-location text-muted">{{ suggestion.location|default:'New to the community' }}</p>
+                                </div>
+                            </div>
+                            <a href="/profile/{{ suggestion.user.username }}" class="btn btn-sm btn-outline-primary suggestion-action">View</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <p class="text-muted">No suggestions available right now. Follow more accounts to see recommendations.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Posts Section -->
+            <div class="posts-container">
+                <h5 class="section-title mb-4"><i class="fa-solid fa-images"></i> Posts</h5>
+                {% if post %}
+                    {% for pos in post %}
+                    <div class="post-wrapper" id="{{pos.id}}">
+                        <div class="post-card-modern">
+                            <!-- Post Header -->
+                            <div class="post-header">
+                                <div class="post-author">
+                                    <img src="{{profile.profileimg.url}}" alt="Author" class="post-author-pic">
+                                    <div class="author-info">
+                                        <h6 class="author-name"><a href="/profile/{{pos.user}}" style="text-decoration: none;">@{{pos.user}}</a></h6>
+                                        <p class="post-date">{{pos.created_at|date:"M d, Y"}}</p>
+                                    </div>
+                                </div>
+                                <button class="btn-more"><i class="fa-solid fa-ellipsis-v"></i></button>
+                            </div>
+
+                            <!-- Post Image -->
+                            <div class="post-image-container">
+                                <img src="{{pos.image.url}}" alt="Post Image" class="post-image-modern">
+                            </div>
+
+                            <!-- Post Caption -->
+                            <div class="post-body">
+                                <p class="post-caption">{{pos.caption}}</p>
+                            </div>
+
+                            <!-- Post Actions -->
+                            <div class="post-actions">
+                                <div class="action-buttons">
+                                    <a href="/like-post/{{pos.id}}" class="action-btn like-btn">
+                                        <i class="fa-solid fa-heart"></i> Like
+                                    </a>
+                                    <button class="action-btn comment-btn">
+                                        <i class="fa-solid fa-comment"></i> Comment
+                                    </button>
+                                    <button class="action-btn share-btn">
+                                        <i class="fa-solid fa-share"></i> Share
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Likes Count -->
+                            <div class="post-stats">
+                                {% if pos.no_of_likes == 0 %}
+                                    <p class="likes-count">No likes yet</p>
+                                {% elif pos.no_of_likes == 1 %}
+                                    <p class="likes-count"><strong>{{pos.no_of_likes}}</strong> person liked this</p>
+                                {% else %}
+                                    <p class="likes-count"><strong>{{pos.no_of_likes}}</strong> people liked this</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="comment-section">
+                                <div class="comment-summary">
+                                    <span>{{ pos.comments.count }} Comments</span>
+                                </div>
+                                <div class="comment-list">
+                                    {% for comment in pos.comments.all|slice:":3" %}
+                                    <div class="comment-item">
+                                        <strong>@{{ comment.user }}</strong> {{ comment.text }}
+                                    </div>
+                                    {% endfor %}
+                                    {% if pos.comments.count > 3 %}
+                                    <div class="comment-item text-muted">View all {{ pos.comments.count }} comments</div>
+                                    {% endif %}
+                                </div>
+                                <form action="/comment/{{ pos.id }}/" method="POST" class="comment-form">
+                                    {% csrf_token %}
+                                    <input type="text" name="comment_text" placeholder="Write a comment..." class="comment-input" required>
+                                    <button type="submit" class="btn btn-sm btn-primary comment-submit">Send</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="no-posts">
+                    <i class="fa-solid fa-inbox"></i>
+                    <p>No posts yet. Follow people to see their posts!</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Videos Section -->
+            <div class="videos-container mt-5">
+                <h5 class="section-title mb-4"><i class="fa-solid fa-video"></i> Videos</h5>
+                <div class="videos-grid">
+                    <div class="video-card">
+                        <div class="video-thumbnail" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <i class="fa-solid fa-play"></i>
+                        </div>
+                        <h6 class="video-title">Featured Video 1</h6>
+                        <p class="video-views">1.2M views</p>
+                    </div>
+                    <div class="video-card">
+                        <div class="video-thumbnail" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <i class="fa-solid fa-play"></i>
+                        </div>
+                        <h6 class="video-title">Featured Video 2</h6>
+                        <p class="video-views">856K views</p>
+                    </div>
+                    <div class="video-card">
+                        <div class="video-thumbnail" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                            <i class="fa-solid fa-play"></i>
+                        </div>
+                        <h6 class="video-title">Featured Video 3</h6>
+                        <p class="video-views">542K views</p>
+                    </div>
+                    <div class="video-card">
+                        <div class="video-thumbnail" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                            <i class="fa-solid fa-play"></i>
+                        </div>
+                        <h6 class="video-title">Featured Video 4</h6>
+                        <p class="video-views">2.1M views</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<!-- Story Upload Modal -->
+<div class="modal fade" id="storyUploadModal" tabindex="-1" aria-labelledby="storyUploadLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content story-modal-content">
+            <div class="modal-header story-modal-header">
+                <h5 class="modal-title" id="storyUploadLabel">
+                    <i class="fa-solid fa-plus-circle"></i> Upload Story
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="storyForm" action="/upload-story/" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="story-image" class="form-label">
+                            <i class="fa-solid fa-image"></i> Select Image
+                        </label>
+                        <input type="file" class="form-control story-input" name="story_image" id="story-image" accept="image/*" required>
+                        <small class="text-muted">Maximum file size: 5MB</small>
+                    </div>
+                    <div id="preview-container" style="display: none; margin: 15px 0; text-align: center;">
+                        <img id="preview-image" src="" alt="Preview" style="max-width: 100%; max-height: 300px; border-radius: 10px;">
+                    </div>
+                </div>
+                <div class="modal-footer story-modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-gradient-story">
+                        <i class="fa-solid fa-share"></i> Upload Story
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Story View Modal -->
+<div class="modal fade" id="storyModal" tabindex="-1" aria-labelledby="storyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content story-view-content">
+            <div class="modal-header story-view-header">
+                <div class="story-viewer-info">
+                    <i class="fa-solid fa-circle" style="color: #f5576c; font-size: 8px; margin-right: 8px;"></i>
+                    <span id="story-viewer-user"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body story-view-body">
+                <img id="story-viewer-image" src="" alt="Story" style="width: 100%; max-height: 600px; object-fit: contain; border-radius: 10px;">
+            </div>
+            <div class="modal-footer story-view-footer story-navigation-footer">
+                <div class="story-navigation">
+                    <button type="button" class="btn btn-sm btn-outline-light" id="prevStoryBtn"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span id="story-viewer-counter" class="text-white"></span>
+                    <button type="button" class="btn btn-sm btn-outline-light" id="nextStoryBtn"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <p id="story-viewer-date" class="text-muted small"></p>
+                <form id="story-delete-form" action="" method="POST" class="d-none mt-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Delete Current Story</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+   
+    <script src="{% static 'js/app.js'%}"></script>
+    <script>
+        // Preview story image before upload
+        const storyImageInput = document.getElementById('story-image');
+        if (storyImageInput) {
+            storyImageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                const previewContainer = document.getElementById('preview-container');
+                const previewImage = document.getElementById('preview-image');
+
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        previewContainer.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewContainer.style.display = 'none';
+                }
+            });
+        }
+
+        const storyGroupsData = document.getElementById('story-groups-data');
+        const storyGroups = storyGroupsData ? JSON.parse(storyGroupsData.textContent) : [];
+        const storyButtons = document.querySelectorAll('.story-circle[data-story-group-index]');
+        let currentStoryGroupIndex = null;
+        let currentStoryIndex = null;
+        const currentUsername = "{{ user.username|escapejs }}";
+        const storyDeleteForm = document.getElementById('story-delete-form');
+
+        function updateStoryViewer(groupIndex, storyIndex = 0) {
+            const group = storyGroups[groupIndex];
+            if (!group || !group.stories.length) return;
+            const story = group.stories[storyIndex];
+            document.getElementById('story-viewer-image').src = story.image;
+            document.getElementById('story-viewer-user').textContent = '@' + group.user;
+            document.getElementById('story-viewer-date').textContent = story.date;
+            document.getElementById('story-viewer-counter').textContent = `${storyIndex + 1} / ${group.stories.length}`;
+            currentStoryGroupIndex = groupIndex;
+            currentStoryIndex = storyIndex;
+
+            if (storyDeleteForm) {
+                if (group.user === currentUsername) {
+                    storyDeleteForm.classList.remove('d-none');
+                    storyDeleteForm.action = '/delete-story/' + story.id + '/';
+                } else {
+                    storyDeleteForm.classList.add('d-none');
+                }
+            }
+        }
+
+        const storyModal = document.getElementById('storyModal');
+        if (storyModal) {
+            storyModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const index = parseInt(button.getAttribute('data-story-group-index'), 10);
+                updateStoryViewer(index, 0);
+            });
+        }
+
+        const prevStoryBtn = document.getElementById('prevStoryBtn');
+        const nextStoryBtn = document.getElementById('nextStoryBtn');
+        if (prevStoryBtn) {
+            prevStoryBtn.addEventListener('click', function() {
+                if (currentStoryGroupIndex === null || currentStoryIndex === null) return;
+                const group = storyGroups[currentStoryGroupIndex];
+                const nextIndex = (currentStoryIndex - 1 + group.stories.length) % group.stories.length;
+                updateStoryViewer(currentStoryGroupIndex, nextIndex);
+            });
+        }
+        if (nextStoryBtn) {
+            nextStoryBtn.addEventListener('click', function() {
+                if (currentStoryGroupIndex === null || currentStoryIndex === null) return;
+                const group = storyGroups[currentStoryGroupIndex];
+                const nextIndex = (currentStoryIndex + 1) % group.stories.length;
+                updateStoryViewer(currentStoryGroupIndex, nextIndex);
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

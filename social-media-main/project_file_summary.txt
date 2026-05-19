@@ -1,0 +1,121 @@
+Project file summary for social-media-main
+
+1. README.md
+- Use: Explains what the project is and how to install/run it.
+- Working: It is a text document for humans only, not used by code.
+
+2. manage.py
+- Use: Main command file to run Django tasks.
+- Working: It starts the development server, applies migrations, and runs Django commands.
+
+3. db.sqlite3
+- Use: Local database file storing users, posts, stories, comments, likes, and followers.
+- Working: Django reads and writes app data here.
+
+4. media/ folder
+- Use: Stores uploaded images for posts, profile pictures, and stories.
+- Working: Django saves uploaded files here and serves them in the app.
+
+5. socialmedia/asgi.py
+- Use: ASGI entry point for asynchronous web servers.
+- Working: Loads Django app for ASGI servers, not normally modified.
+
+6. socialmedia/settings.py
+- Use: Main configuration for the Django project.
+- Working: Defines installed apps, database settings, static/media paths, and security options.
+
+7. socialmedia/urls.py
+- Use: Routes URLs to app views.
+- Working: Directs browser requests to the correct app or page handlers.
+
+8. socialmedia/wsgi.py
+- Use: WSGI entry point for production web servers.
+- Working: Loads Django app for WSGI servers, similar to asgi.py but for sync servers.
+
+9. socialmedia/__init__.py
+- Use: Marks the folder as a Python package.
+- Working: Usually empty, needed for Python imports.
+
+10. static/ folder
+- Use: Stores CSS and JavaScript files for the website look and behavior.
+- Working: Browser downloads these files to style pages and run client-side scripts.
+
+11. templates/ folder
+- Use: Stores HTML page templates for the app.
+- Working: Django renders these templates and fills them with data from views.
+
+12. templates/edit_profile.html
+- Use: Form for editing user profile details.
+- Working: Shows profile edit fields and sends changes to the server.
+
+13. templates/explore.html
+- Use: Explore page to view all posts.
+- Working: Displays posts from all users and navigation links.
+
+14. templates/loginn.html
+- Use: Login page for users.
+- Working: Collects username and password, then logs the user in.
+
+15. templates/main.html
+- Use: Main homepage feed for the logged-in user.
+- Working: Shows feed posts, stories, suggestions, and upload/story modals.
+
+16. templates/messages.html
+- Use: Messaging page for user conversations.
+- Working: Displays message list, conversation view, and send form.
+
+17. templates/modal.html
+- Use: Post upload modal window.
+- Working: Lets users select images and captions to create new posts.
+
+18. templates/profile.html
+- Use: User profile page.
+- Working: Shows user info, stats, posts, likes, comments, and follow/message buttons.
+
+19. templates/profile_upload.html
+- Use: Profile image upload form.
+- Working: Lets users upload a new profile picture.
+
+20. templates/search.html
+- Use: Search modal or box.
+- Working: Allows users to search for people or posts.
+
+21. templates/search_user.html
+- Use: Search results page.
+- Working: Displays users and posts matching the search query.
+
+22. templates/signup.html
+- Use: Sign-up page for new users.
+- Working: Collects username, email, and password to create a new account.
+
+23. userauth/admin.py
+- Use: Django admin registration for models.
+- Working: Allows admin view access to models if configured.
+
+24. userauth/apps.py
+- Use: App configuration class.
+- Working: Registers the app in Django.
+
+25. userauth/models.py
+- Use: Defines database tables for the app.
+- Working: Contains Profile, Post, LikePost, Followers, Story, Comment, Message models.
+
+26. userauth/tests.py
+- Use: Placeholder for automated tests.
+- Working: Can store test code, but currently likely empty.
+
+27. userauth/urls.py
+- Use: App-specific URL routes.
+- Working: Maps URL paths like /profile/, /messages/, /upload to view functions.
+
+28. userauth/views.py
+- Use: Main app logic and page handlers.
+- Working: Handles login, signup, posting, story upload, likes, comments, messaging, profile display, follow/unfollow, and deletions.
+
+29. userauth/__init__.py
+- Use: Marks the app folder as a Python package.
+- Working: Usually empty, enables imports.
+
+30. userauth/migrations/ folder
+- Use: Stored database change history.
+- Working: Tracks model changes so Django can update the database schema.
